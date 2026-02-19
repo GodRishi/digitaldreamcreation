@@ -1,6 +1,6 @@
 import React from 'react';
 import { ALBUMS } from '../constants';
-import { Reveal } from './ui/Reveal';
+import { Reveal } from './Reveal';
 import { AlbumItem } from '../types';
 import { BookOpen, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';

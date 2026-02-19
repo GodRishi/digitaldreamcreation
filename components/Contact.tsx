@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Reveal } from './ui/Reveal';
+import { Reveal } from './Reveal';
 import { Send, MapPin, Mail, Phone, MessageCircle, Check, Loader2, AlertCircle } from 'lucide-react';
 
 export const Contact = () => {

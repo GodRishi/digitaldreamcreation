@@ -1,5 +1,5 @@
 import React from 'react';
-import { Reveal } from './ui/Reveal';
+import { Reveal } from './Reveal';
 import { Camera, Heart, Film } from 'lucide-react';
 
 export const About = () => {
