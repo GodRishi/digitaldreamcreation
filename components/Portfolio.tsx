@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PORTFOLIO_ITEMS } from '../constants';
-import { Reveal } from './ui/Reveal';
+import { Reveal } from './Reveal';
 import { Play, X } from 'lucide-react';
 import { VideoItem } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
