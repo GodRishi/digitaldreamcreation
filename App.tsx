@@ -6,7 +6,7 @@ import { Portfolio } from './components/Portfolio';
 import { Albums } from './components/Albums';
 import { About } from './components/About';
 import { Contact } from './components/Contact';
-import { Reveal } from './components/ui/Reveal';
+import { Reveal } from './components/Reveal';
 import { TESTIMONIALS } from './constants';
 import { Star } from 'lucide-react';
 
