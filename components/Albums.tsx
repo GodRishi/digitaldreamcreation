@@ -2,7 +2,7 @@ import React from 'react';
 import { ALBUMS } from '../constants';
 import { Reveal } from './Reveal';
 import { AlbumItem } from '../types';
-import { BookOpen, ArrowRight } from 'lucide-react';
+import { BookOpen, ArrowRight, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Albums = () => {
@@ -26,7 +26,7 @@ export const Albums = () => {
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
           {ALBUMS.map((album) => (
             <AlbumCard key={album.id} album={album} />
           ))}
@@ -44,28 +44,44 @@ export const Albums = () => {
 };
 
 const AlbumCard: React.FC<{ album: AlbumItem }> = ({ album }) => {
+  const Wrapper = album.driveLink ? 'a' : 'div';
+  const linkProps = album.driveLink 
+    ? { href: album.driveLink, target: '_blank', rel: 'noopener noreferrer' } 
+    : {};
+
   return (
     <Reveal>
-      <div className="group cursor-pointer">
-        <div className="relative aspect-[4/5] bg-white dark:bg-gray-800 p-3 md:p-3 shadow-xl hover:shadow-2xl dark:shadow-2xl dark:shadow-black/50 transform transition-all duration-500 group-hover:-translate-y-2 rounded-sm border border-gray-100 dark:border-white/5">
-          {/* Album Cover Effect */}
-          <div className="absolute inset-0 bg-gray-200 dark:bg-white/5 transform rotate-1 scale-[0.98] z-0 rounded-sm transition-transform duration-500 group-hover:rotate-2"></div>
-          <div className="relative z-10 w-full h-full overflow-hidden bg-gray-900 rounded-sm">
+      <Wrapper {...linkProps} className="group cursor-pointer block">
+        {/* Image Container */}
+        <div className="relative aspect-[3/2] bg-zinc-900 rounded-sm overflow-hidden mb-4 shadow-lg group-hover:shadow-xl transition-all duration-500 border border-gray-100 dark:border-white/5">
              <img 
                src={album.coverUrl} 
                alt={album.title} 
-               className="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105 transform" 
+               className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105" 
              />
-             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-70 group-hover:opacity-60 transition-opacity duration-500"></div>
              
-             <div className="absolute bottom-0 left-0 p-5 w-full translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-               <span className="block text-gold-400 text-[0.65rem] tracking-[0.25em] uppercase mb-2 font-semibold">{album.year}</span>
-               <h3 className="font-serif text-2xl md:text-2xl text-white mb-1.5 leading-tight">{album.clientNames}</h3>
-               <p className="text-gray-300 text-xs italic font-light tracking-wide">{album.title}</p>
-             </div>
-          </div>
+             {/* External Link Icon */}
+             {album.driveLink && (
+               <div className="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                 <div className="bg-black/50 backdrop-blur-md p-2 rounded-full text-white hover:bg-gold-500 transition-colors">
+                   <ExternalLink size={14} />
+                 </div>
+               </div>
+             )}
         </div>
-      </div>
+
+        {/* Text Content Below */}
+        <div className="px-1">
+           <div className="flex justify-between items-center mb-1">
+              <span className="text-gold-600 dark:text-gold-500 text-[0.65rem] tracking-[0.2em] uppercase font-bold">{album.year}</span>
+           </div>
+           <h3 className="font-serif text-xl text-gray-900 dark:text-white mb-1 group-hover:text-gold-600 dark:group-hover:text-gold-400 transition-colors">{album.clientNames}</h3>
+           <p className="text-gray-500 dark:text-gray-400 text-sm font-light flex items-center gap-2">
+             {album.title}
+             {album.driveLink && <ExternalLink size={12} className="opacity-50" />}
+           </p>
+        </div>
+      </Wrapper>
     </Reveal>
   );
 };

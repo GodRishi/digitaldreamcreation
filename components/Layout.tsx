@@ -252,7 +252,7 @@ export const Layout = ({ children }: { children?: React.ReactNode }) => {
                    <span className="group-hover:text-gray-900 dark:group-hover:text-white transition-colors break-all">saharishav.1940@gmail.com</span>
                 </li>
                  <li className="flex items-start gap-3">
-                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse"></div>
                    <span>Available for video editing projects</span>
                 </li>
               </ul>
@@ -261,7 +261,7 @@ export const Layout = ({ children }: { children?: React.ReactNode }) => {
 
           <div className="border-t border-gray-200 dark:border-white/5 pt-6 flex flex-col md:flex-row justify-between items-center text-[0.65rem] md:text-xs text-gray-500 font-medium">
             <p className="text-center md:text-left">&copy; {new Date().getFullYear()} Digital Dream Creation. All rights reserved.</p>
-            <p className="mt-2 md:mt-0 flex items-center gap-1">Designed with <span className="text-red-500">❤</span> passion.</p>
+            <p className="mt-2 md:mt-0 flex items-center gap-1">Designed with <span className="text-red-500">❤️</span> By Rishi Saha</p>
           </div>
         </div>
       </footer>

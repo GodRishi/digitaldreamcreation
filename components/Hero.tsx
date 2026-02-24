@@ -44,7 +44,7 @@ export const Hero = () => {
           </h1>
 
           <p className="text-gray-800 dark:text-gray-300 text-base md:text-xl font-light max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-            We don't just edit events; we weave emotions into <span className="text-gray-900 dark:text-white font-medium">timeless stories</span>. Experience the magic of your special day through our lens.
+            Professional <span className="text-gray-900 dark:text-white font-medium">video editing</span> and post-production services. We turn your raw footage into polished, cinematic stories with expert color grading, sound design, and narrative flow.
           </p>
 
           <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center pt-6 md:pt-8 w-full md:w-auto">

@@ -9,38 +9,10 @@ export const About = () => {
       <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-gray-200/50 to-transparent dark:from-white/5 dark:to-transparent pointer-events-none"></div>
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="max-w-4xl mx-auto text-center">
           
-          {/* Image Grid */}
-          <div className="relative order-2 lg:order-1">
-            <Reveal>
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
-                <img 
-                  src="https://picsum.photos/600/800?random=20" 
-                  alt="Founder working" 
-                  className="rounded-sm w-full h-40 md:h-56 object-cover mt-8 md:mt-10 shadow-xl hover:scale-[1.02] transition-transform duration-500"
-                />
-                <img 
-                  src="https://picsum.photos/600/800?random=21" 
-                  alt="Editing station" 
-                  className="rounded-sm w-full h-40 md:h-56 object-cover shadow-xl hover:scale-[1.02] transition-transform duration-500"
-                />
-                <img 
-                  src="https://picsum.photos/600/800?random=22" 
-                  alt="Wedding couple" 
-                  className="rounded-sm w-full h-40 md:h-56 object-cover shadow-xl hover:scale-[1.02] transition-transform duration-500"
-                />
-                <img 
-                  src="https://picsum.photos/600/800?random=23" 
-                  alt="Editing suite" 
-                  className="rounded-sm w-full h-40 md:h-56 object-cover mt-[-2rem] md:mt-[-2.5rem] shadow-xl hover:scale-[1.02] transition-transform duration-500"
-                />
-              </div>
-            </Reveal>
-          </div>
-
           {/* Text Content */}
-          <div className="order-1 lg:order-2">
+          <div>
             <Reveal>
               <span className="text-gold-500 text-xs tracking-[0.2em] uppercase font-bold">The Editor</span>
               <h2 className="font-serif text-3xl md:text-5xl text-gray-900 dark:text-white mt-3 mb-6 font-bold leading-tight">Rishav Saha & <br/><span className="text-gray-500 dark:text-gray-500 italic">Digital Dream Creation</span></h2>

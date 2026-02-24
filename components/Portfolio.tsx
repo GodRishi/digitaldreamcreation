@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { PORTFOLIO_ITEMS } from '../constants';
 import { Reveal } from './Reveal';
-import { Play, X } from 'lucide-react';
+import { Play, X, ExternalLink } from 'lucide-react';
 import { VideoItem } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CATEGORIES = [
   { id: 'all', label: 'All Films' },
   { id: 'wedding', label: 'Weddings' },
-  { id: 'reel', label: 'Reels' },
-  { id: 'event', label: 'Events' },
+  { id: 'engagement', label: 'Engagements' },
 ];
 
 export const Portfolio = () => {
@@ -31,6 +30,60 @@ export const Portfolio = () => {
       document.body.style.overflow = 'unset';
     };
   }, [selectedVideo]);
+
+  const getVideoContent = (url?: string) => {
+    if (!url) return null;
+
+    // Google Drive
+    if (url.includes('drive.google.com')) {
+      // Replace /view or /edit with /preview for embedding
+      // Also handles generic id= parameter if present, though /file/d/ is standard
+      const embedUrl = url.replace(/\/view.*|\/edit.*/, '/preview');
+      return (
+        <iframe
+          src={embedUrl}
+          className="w-full h-full border-0"
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          title="Google Drive Video"
+        ></iframe>
+      );
+    }
+    
+    // YouTube
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+         let embedUrl = url;
+         if (url.includes('watch?v=')) {
+             const videoId = url.split('watch?v=')[1]?.split('&')[0];
+             embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+         } else if (url.includes('youtu.be/')) {
+             const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+             embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+         }
+         return (
+            <iframe
+                src={embedUrl}
+                className="w-full h-full border-0"
+                allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="YouTube Video"
+            ></iframe>
+         );
+    }
+
+    // Default HTML5 Video
+    return (
+      <video 
+        src={url} 
+        className="w-full h-full object-contain"
+        controls
+        autoPlay
+        playsInline
+      >
+        Your browser does not support the video tag.
+      </video>
+    );
+  };
 
   return (
     <section className="py-20 md:py-24 bg-white dark:bg-cinema-black transition-colors duration-500">
@@ -90,7 +143,7 @@ export const Portfolio = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative w-full max-w-6xl aspect-video bg-black rounded-sm shadow-2xl overflow-hidden"
+              className="relative w-full max-w-5xl bg-zinc-900 rounded-sm shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <button 
@@ -100,15 +153,31 @@ export const Portfolio = () => {
                 <X size={20} />
               </button>
               
-              <video 
-                src={selectedVideo.videoUrl} 
-                className="w-full h-full object-contain"
-                controls
-                autoPlay
-                playsInline
-              >
-                Your browser does not support the video tag.
-              </video>
+              <div className="w-full aspect-video bg-black relative">
+                {getVideoContent(selectedVideo.videoUrl)}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="w-full p-6 bg-zinc-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-t border-white/10">
+                 <div>
+                    <h3 className="text-xl md:text-2xl font-bold font-serif text-white mb-1">{selectedVideo.title}</h3>
+                    <p className="text-gray-300 text-sm max-w-xl">{selectedVideo.description}</p>
+                 </div>
+                 
+                 {selectedVideo.driveLink && (
+                   <a 
+                     href={selectedVideo.driveLink} 
+                     target="_blank" 
+                     rel="noopener noreferrer"
+                     className="flex-shrink-0 flex items-center gap-2 bg-gold-500 hover:bg-gold-600 text-white px-5 py-2.5 rounded-sm text-xs font-bold uppercase tracking-widest transition-colors shadow-lg hover:shadow-gold-500/20"
+                     onClick={(e) => e.stopPropagation()}
+                   >
+                     <span>View on Drive</span>
+                     <ExternalLink size={14} />
+                   </a>
+                 )}
+              </div>
+
             </motion.div>
           </motion.div>
         )}
