@@ -14,6 +14,7 @@ import { Star } from 'lucide-react';
 const Home = () => (
   <>
     <Hero />
+    <Contact />
     <Portfolio />
     <Albums />
     
@@ -45,7 +46,6 @@ const Home = () => (
     </section>
 
     <About />
-    <Contact />
   </>
 );
 

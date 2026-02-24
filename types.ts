@@ -1,9 +1,10 @@
 export interface VideoItem {
   id: string;
   title: string;
-  category: 'wedding' | 'reel' | 'event';
+  category: 'wedding' | 'reel' | 'event' | 'engagement';
   thumbnailUrl: string;
   videoUrl?: string; // For simulation, we might use placeholder or generic embeds
+  driveLink?: string; // Link to Google Drive folder/file
   duration?: string;
   description: string;
 }
@@ -21,6 +22,7 @@ export interface AlbumItem {
   title: string;
   clientNames: string;
   coverUrl: string;
+  driveLink?: string; // Link to Google Drive album
   year: string;
 }
 
