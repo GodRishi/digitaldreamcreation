@@ -14,40 +14,11 @@ const NAV_LINKS = [
 
 // Custom Logo Component to ensure high quality and no broken links
 const BrandLogo = ({ className, idSuffix }: { className?: string, idSuffix: string }) => (
-  <svg viewBox="0 0 200 200" className={className}>
-    <defs>
-      {/* Top Arc: Left to Right */}
-      <path id={`curveTop${idSuffix}`} d="M 25,100 A 75,75 0 0,1 175,100" fill="transparent" />
-      {/* Bottom Arc: Left to Right */}
-      <path id={`curveBottom${idSuffix}`} d="M 25,100 A 75,75 0 0,0 175,100" fill="transparent" />
-    </defs>
-    
-    {/* Background Circle */}
-    <circle cx="100" cy="100" r="98" className="fill-white dark:fill-cinema-black stroke-gold-500/50 stroke-[2px]" />
-    
-    {/* Inner decorative circle */}
-    <circle cx="100" cy="100" r="78" className="fill-transparent stroke-gold-500/20 stroke-[1px]" />
-
-    {/* Top Text: EDITING */}
-    <text className="fill-gray-900 dark:fill-white font-serif font-bold tracking-[0.25em] text-[18px]" style={{ textAnchor: "middle" }} dy="-5">
-      <textPath href={`#curveTop${idSuffix}`} startOffset="50%">
-        EDITING
-      </textPath>
-    </text>
-    
-    {/* Bottom Text: REMASTERED */}
-    {/* Using dy to position it inside/along the bottom arc */}
-    <text className="fill-gray-900 dark:fill-white font-serif font-bold tracking-[0.25em] text-[16px]" style={{ textAnchor: "middle" }} dy="18">
-      <textPath href={`#curveBottom${idSuffix}`} startOffset="50%">
-        REMASTERED
-      </textPath>
-    </text>
-    
-    {/* Center Stack */}
-    <text x="100" y="85" textAnchor="middle" className="fill-gray-900 dark:fill-white font-serif font-bold text-[22px] leading-none">DIGITAL</text>
-    <text x="100" y="108" textAnchor="middle" className="fill-gray-900 dark:fill-white font-serif font-bold text-[22px] leading-none">DREAM</text>
-    <text x="100" y="132" textAnchor="middle" className="fill-gold-500 font-sans font-bold text-[10px] tracking-[0.2em] uppercase">CREATION</text>
-  </svg>
+    <img 
+      src="https://i.ibb.co/jv6v0d8b/cropped-circle-image.png" 
+      alt="Digital Dream Creation Logo" 
+      className={className} 
+    />
 );
 
 export const Layout = ({ children }: { children?: React.ReactNode }) => {
