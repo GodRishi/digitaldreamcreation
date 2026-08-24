@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, LogOut, Film, CheckCircle2, AlertCircle, RefreshCw, Play, Clock, Sparkles } from 'lucide-react';
+import { Upload, LogOut, Film, CheckCircle2, AlertCircle, RefreshCw, Clock, Sparkles, Image as ImageIcon } from 'lucide-react';
 
 export default function AdminDashboard({ onLogout }) {
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [uploadingSlot, setUploadingSlot] = useState(null);
+  
+  // Track uploading state: { slotKey, targetType: 'video' | 'thumbnail' }
+  const [uploadingState, setUploadingState] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [toast, setToast] = useState(null);
 
@@ -41,30 +43,40 @@ export default function AdminDashboard({ onLogout }) {
     onLogout();
   };
 
-  // Upload handler with XMLHttpRequest for progress tracking
-  const handleUpload = (slotKey, file) => {
+  // Upload handler with targetType ('video' | 'thumbnail')
+  const handleUpload = (slotKey, file, targetType = 'video') => {
     if (!file) return;
 
-    // Client-side pre-validation
     const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
-    if (!['.mp4', '.webm', '.mov'].includes(ext)) {
-      showToast('error', `Invalid file type (${ext}). Only .mp4, .webm, and .mov files are permitted.`);
-      return;
+
+    if (targetType === 'thumbnail') {
+      if (!['.jpg', '.jpeg', '.png', '.webp'].includes(ext)) {
+        showToast('error', `Invalid thumbnail image type (${ext}). Only .jpg, .jpeg, .png, and .webp images are accepted.`);
+        return;
+      }
+      if (file.size > 15 * 1024 * 1024) { // 15MB
+        showToast('error', `Thumbnail size (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds the 15MB limit.`);
+        return;
+      }
+    } else {
+      if (!['.mp4', '.webm', '.mov'].includes(ext)) {
+        showToast('error', `Invalid video file type (${ext}). Only .mp4, .webm, and .mov video files are accepted.`);
+        return;
+      }
+      if (file.size > 150 * 1024 * 1024) { // 150MB
+        showToast('error', `Video size (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds the 150MB limit.`);
+        return;
+      }
     }
 
-    const maxSize = 150 * 1024 * 1024; // 150MB
-    if (file.size > maxSize) {
-      showToast('error', `File size (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds the 150MB limit.`);
-      return;
-    }
-
-    setUploadingSlot(slotKey);
+    setUploadingState({ slotKey, targetType });
     setUploadProgress(0);
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/api/upload');
 
     xhr.setRequestHeader('x-slot-key', slotKey);
+    xhr.setRequestHeader('x-target-type', targetType);
     xhr.setRequestHeader('x-filename', file.name);
 
     xhr.upload.onprogress = (e) => {
@@ -75,16 +87,16 @@ export default function AdminDashboard({ onLogout }) {
     };
 
     xhr.onload = () => {
-      setUploadingSlot(null);
+      setUploadingState(null);
       setUploadProgress(0);
 
       try {
         const res = JSON.parse(xhr.responseText);
         if (xhr.status === 200 && res.success) {
-          showToast('success', `Video updated successfully for ${slotKey}!`);
+          showToast('success', `${targetType === 'thumbnail' ? 'Thumbnail cover image' : 'Video file'} updated successfully!`);
           fetchSlots(); // Refresh slot list and preview players immediately
         } else {
-          showToast('error', res.error || 'Failed to replace video.');
+          showToast('error', res.error || 'Failed to replace file.');
         }
       } catch (err) {
         showToast('error', 'Server error parsing upload response.');
@@ -92,9 +104,9 @@ export default function AdminDashboard({ onLogout }) {
     };
 
     xhr.onerror = () => {
-      setUploadingSlot(null);
+      setUploadingState(null);
       setUploadProgress(0);
-      showToast('error', 'Network error during video upload. Please check connection and retry.');
+      showToast('error', 'Network error during file upload. Please check connection and retry.');
     };
 
     xhr.send(file);
@@ -112,13 +124,13 @@ export default function AdminDashboard({ onLogout }) {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full apple-glass text-[10px] uppercase font-cinzel tracking-[0.25em] text-[#D9B36C] mb-2 font-bold">
               <Sparkles className="w-3 h-3" />
-              <span>Self-Service Control</span>
+              <span>Studio Management</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-serif text-[#F5F5F7]">
-              Studio Video Manager
+              Studio Video & Thumbnail Manager
             </h1>
             <p className="text-xs text-[#86868B] font-light mt-1">
-              Replace showcase videos directly. Changes take effect on the live site immediately.
+              Replace showcase videos and cover thumbnails directly. Changes take effect on the live site immediately.
             </p>
           </div>
 
@@ -153,102 +165,182 @@ export default function AdminDashboard({ onLogout }) {
         <div className="mb-10 p-5 rounded-2xl apple-glass border border-[#D9B36C]/30 text-xs text-[#86868B] flex items-start gap-3">
           <Film className="w-5 h-5 text-[#D9B36C] shrink-0 mt-0.5" />
           <div>
-            <p className="text-[#F5F5F7] font-medium mb-0.5">Showcase Video Slots</p>
+            <p className="text-[#F5F5F7] font-medium mb-0.5">Showcase Video & Thumbnail Manager</p>
             <p className="leading-relaxed">
-              Upload formats accepted: <span className="text-[#D9B36C] font-mono">.MP4</span>, <span className="text-[#D9B36C] font-mono">.WEBM</span>, <span className="text-[#D9B36C] font-mono">.MOV</span> up to <span className="text-[#D9B36C] font-mono">150MB</span> per video. Note: The hero camera assembly animation is developer-managed and excluded from this panel.
+              Videos: <span className="text-[#D9B36C] font-mono">.MP4, .WEBM, .MOV</span> (max 150MB). Cover Thumbnails: <span className="text-[#D9B36C] font-mono">.JPG, .PNG, .WEBP</span> (max 15MB). The hero camera assembly animation is code-managed and excluded.
             </p>
           </div>
         </div>
 
-        {/* Video Slots List */}
+        {/* Video & Thumbnail Slots List */}
         {loading ? (
           <div className="py-20 text-center text-xs text-[#86868B] font-cinzel tracking-widest uppercase">
             <RefreshCw className="w-6 h-6 text-[#D9B36C] animate-spin mx-auto mb-3" />
-            <span>Loading Video Slots...</span>
+            <span>Loading Media Slots...</span>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-10">
             {slots.map((slot) => {
-              const isCurrentlyUploading = uploadingSlot === slot.slotKey;
+              const isUploadingVideo = uploadingState?.slotKey === slot.slotKey && uploadingState?.targetType === 'video';
+              const isUploadingThumb = uploadingState?.slotKey === slot.slotKey && uploadingState?.targetType === 'thumbnail';
 
               return (
                 <div
                   key={slot.slotKey}
-                  className="rounded-2xl apple-glass-card border border-[#2C2C2E] p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden"
+                  className="rounded-2xl apple-glass-card border border-[#2C2C2E] p-6 md:p-8 flex flex-col shadow-2xl relative overflow-hidden"
                 >
-                  <div>
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-3">
+                  {/* Slot Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-6 border-b border-[#2C2C2E] mb-6">
+                    <div>
                       <span className="text-[9px] font-cinzel tracking-widest uppercase text-[#D9B36C] font-bold">
                         {slot.category}
                       </span>
-                      <div className="flex items-center gap-1 text-[10px] text-[#86868B] font-mono">
-                        <Clock className="w-3 h-3 text-[#D9B36C]" />
-                        <span>Updated: {slot.lastUpdated}</span>
-                      </div>
+                      <h3 className="text-2xl font-serif text-[#F5F5F7] mt-0.5">
+                        {slot.label}
+                      </h3>
                     </div>
-
-                    <h3 className="text-xl font-serif text-[#F5F5F7] mb-4">
-                      {slot.label}
-                    </h3>
-
-                    {/* Preview Video Player */}
-                    <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-[#000000] border border-[#2C2C2E] mb-6">
-                      {slot.videoUrl.includes('youtube.com') || slot.videoUrl.includes('vimeo.com') ? (
-                        <iframe
-                          src={slot.videoUrl}
-                          title={slot.label}
-                          className="w-full h-full border-0 pointer-events-none"
-                        />
-                      ) : (
-                        <video
-                          src={slot.videoUrl}
-                          controls
-                          className="w-full h-full object-cover"
-                        />
-                      )}
+                    <div className="flex items-center gap-1.5 text-[10px] text-[#86868B] font-mono">
+                      <Clock className="w-3.5 h-3.5 text-[#D9B36C]" />
+                      <span>Last Updated: {slot.lastUpdated}</span>
                     </div>
                   </div>
 
-                  {/* Upload Dropzone */}
-                  <div>
-                    {isCurrentlyUploading ? (
-                      <div className="p-5 rounded-xl bg-[#000000] border border-[#D9B36C]/50 text-center">
-                        <div className="flex items-center justify-between text-xs text-[#D9B36C] font-cinzel uppercase tracking-wider mb-2 font-bold">
-                          <span>Uploading New Video...</span>
-                          <span>{uploadProgress}%</span>
+                  {/* 2-Column Grid: Video Section (Left) vs Thumbnail Section (Right) */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    
+                    {/* VIDEO COLUMN */}
+                    <div className="flex flex-col justify-between p-5 rounded-xl bg-[#000000]/70 border border-[#2C2C2E]">
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-[#F5F5F7] flex items-center gap-2">
+                            <Film className="w-4 h-4 text-[#D9B36C]" /> Showcase Video
+                          </span>
+                          <span className="text-[10px] text-[#86868B] font-mono">Max 150MB</span>
                         </div>
-                        <div className="w-full h-2 bg-[#1C1C1E] rounded-full overflow-hidden border border-[#2C2C2E]">
-                          <div
-                            className="h-full bg-gold-gradient transition-all duration-200"
-                            style={{ width: `${uploadProgress}%` }}
-                          />
+
+                        {/* Video Preview */}
+                        <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden bg-[#000000] border border-[#2C2C2E] mb-4">
+                          {slot.videoUrl.includes('youtube.com') || slot.videoUrl.includes('vimeo.com') ? (
+                            <iframe
+                              src={slot.videoUrl}
+                              title={slot.label}
+                              className="w-full h-full border-0 pointer-events-none"
+                            />
+                          ) : (
+                            <video
+                              src={slot.videoUrl}
+                              controls
+                              className="w-full h-full object-cover"
+                            />
+                          )}
                         </div>
-                        <p className="text-[10px] text-[#86868B] mt-2 font-mono">
-                          Overwriting existing file at slot key. Please do not close page.
-                        </p>
                       </div>
-                    ) : (
-                      <label className="group flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-[#2C2C2E] hover:border-[#D9B36C] bg-[#000000]/60 hover:bg-[#000000] transition-all cursor-pointer">
-                        <Upload className="w-6 h-6 text-[#86868B] group-hover:text-[#D9B36C] transition-colors mb-2" />
-                        <span className="text-xs font-semibold text-[#F5F5F7] group-hover:text-[#D9B36C] transition-colors">
-                          Replace Video File
-                        </span>
-                        <span className="text-[10px] text-[#86868B] font-mono mt-1">
-                          Drag & drop or click to browse (.mp4, .webm, .mov max 150MB)
-                        </span>
-                        <input
-                          type="file"
-                          accept=".mp4,.webm,.mov"
-                          className="hidden"
-                          onChange={(e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              handleUpload(slot.slotKey, e.target.files[0]);
-                            }
-                          }}
-                        />
-                      </label>
-                    )}
+
+                      {/* Video Upload Dropzone */}
+                      {isUploadingVideo ? (
+                        <div className="p-4 rounded-xl bg-[#000000] border border-[#D9B36C]/50 text-center">
+                          <div className="flex items-center justify-between text-xs text-[#D9B36C] font-cinzel uppercase tracking-wider mb-2 font-bold">
+                            <span>Uploading Video...</span>
+                            <span>{uploadProgress}%</span>
+                          </div>
+                          <div className="w-full h-2 bg-[#1C1C1E] rounded-full overflow-hidden border border-[#2C2C2E]">
+                            <div
+                              className="h-full bg-gold-gradient transition-all duration-200"
+                              style={{ width: `${uploadProgress}%` }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <label className="group flex items-center justify-center gap-3 p-4 rounded-xl border border-dashed border-[#2C2C2E] hover:border-[#D9B36C] bg-[#000000] hover:bg-[#161412] transition-all cursor-pointer text-center">
+                          <Upload className="w-5 h-5 text-[#86868B] group-hover:text-[#D9B36C] transition-colors shrink-0" />
+                          <div>
+                            <span className="text-xs font-semibold text-[#F5F5F7] group-hover:text-[#D9B36C] transition-colors block">
+                              Replace Video File
+                            </span>
+                            <span className="text-[9px] text-[#86868B] font-mono block">
+                              (.mp4, .webm, .mov)
+                            </span>
+                          </div>
+                          <input
+                            type="file"
+                            accept=".mp4,.webm,.mov"
+                            className="hidden"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                handleUpload(slot.slotKey, e.target.files[0], 'video');
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+                    </div>
+
+                    {/* THUMBNAIL COVER COLUMN */}
+                    <div className="flex flex-col justify-between p-5 rounded-xl bg-[#000000]/70 border border-[#2C2C2E]">
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-xs font-semibold text-[#F5F5F7] flex items-center gap-2">
+                            <ImageIcon className="w-4 h-4 text-[#D9B36C]" /> Card Cover Thumbnail
+                          </span>
+                          <span className="text-[10px] text-[#86868B] font-mono">Max 15MB</span>
+                        </div>
+
+                        {/* Thumbnail Preview */}
+                        <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden bg-[#000000] border border-[#2C2C2E] mb-4">
+                          {slot.thumbnailUrl ? (
+                            <img
+                              src={slot.thumbnailUrl}
+                              alt={slot.label}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-[#86868B] text-xs">
+                              <ImageIcon className="w-8 h-8 text-[#2C2C2E] mb-1" />
+                              <span>No custom thumbnail</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Thumbnail Upload Dropzone */}
+                      {isUploadingThumb ? (
+                        <div className="p-4 rounded-xl bg-[#000000] border border-[#D9B36C]/50 text-center">
+                          <div className="flex items-center justify-between text-xs text-[#D9B36C] font-cinzel uppercase tracking-wider mb-2 font-bold">
+                            <span>Uploading Cover Image...</span>
+                            <span>{uploadProgress}%</span>
+                          </div>
+                          <div className="w-full h-2 bg-[#1C1C1E] rounded-full overflow-hidden border border-[#2C2C2E]">
+                            <div
+                              className="h-full bg-gold-gradient transition-all duration-200"
+                              style={{ width: `${uploadProgress}%` }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <label className="group flex items-center justify-center gap-3 p-4 rounded-xl border border-dashed border-[#2C2C2E] hover:border-[#D9B36C] bg-[#000000] hover:bg-[#161412] transition-all cursor-pointer text-center">
+                          <Upload className="w-5 h-5 text-[#86868B] group-hover:text-[#D9B36C] transition-colors shrink-0" />
+                          <div>
+                            <span className="text-xs font-semibold text-[#F5F5F7] group-hover:text-[#D9B36C] transition-colors block">
+                              Replace Cover Thumbnail
+                            </span>
+                            <span className="text-[9px] text-[#86868B] font-mono block">
+                              (.jpg, .jpeg, .png, .webp)
+                            </span>
+                          </div>
+                          <input
+                            type="file"
+                            accept=".jpg,.jpeg,.png,.webp"
+                            className="hidden"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                handleUpload(slot.slotKey, e.target.files[0], 'thumbnail');
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+                    </div>
+
                   </div>
 
                 </div>

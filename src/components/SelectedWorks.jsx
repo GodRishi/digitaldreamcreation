@@ -82,7 +82,7 @@ export default function SelectedWorks() {
   const [activeTab, setActiveTab] = useState('All');
   const [activeModalFilm, setActiveModalFilm] = useState(null);
 
-  // Fetch updated video URLs from /api/videos manifest
+  // Fetch updated video URLs and thumbnail URLs from /api/videos manifest
   useEffect(() => {
     const fetchVideos = async () => {
       try {
@@ -94,15 +94,19 @@ export default function SelectedWorks() {
           setFilms(prevFilms => {
             return prevFilms.map(film => {
               const updatedSlot = data.slots.find(s => s.slotKey === film.slotKey);
-              if (updatedSlot && updatedSlot.videoUrl) {
-                return { ...film, videoUrl: updatedSlot.videoUrl };
+              if (updatedSlot) {
+                return {
+                  ...film,
+                  videoUrl: updatedSlot.videoUrl || film.videoUrl,
+                  thumbnail: updatedSlot.thumbnailUrl || film.thumbnail
+                };
               }
               return film;
             });
           });
         }
       } catch (err) {
-        // Fallback to static URLs if API unavailable
+        // Fallback to initial state if API unavailable
       }
     };
 
